@@ -1,0 +1,24 @@
+From d6bdfe4dc5a16b66fe7a327d2708b047b9743bac Mon Sep 17 00:00:00 2001
+From: josh <josh_jiang@sdc.sercomm.com>
+Date: Wed, 11 Feb 2026 15:01:20 +0800
+Subject: [PATCH] modify sonic-mgmt-framework GOPROXY
+
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+index 73ee131..febb158 100644
+--- a/Makefile
++++ b/Makefile
+@@ -28,6 +28,7 @@ GO_MOD   = go.mod
+ GO_DEPS  = vendor/.done
+ GO_CODEGEN_INIT := $(BUILD_DIR)/rest_server/dist/.init_done
+ 
++export GOPROXY=https://goproxy.cn,direct
+ export TOPDIR MGMT_COMMON_DIR GO GOPATH
+ 
+ .PHONY: all
+-- 
+2.25.1
+

@@ -119,7 +119,7 @@ sudo LANG=C chroot $FILESYSTEM_ROOT mount
 
 ## Pointing apt to public apt mirrors and getting latest packages, needed for latest security updates
 scripts/build_mirror_config.sh files/apt $CONFIGURED_ARCH $IMAGE_DISTRO
-sudo cp files/apt/sources.list.$CONFIGURED_ARCH $FILESYSTEM_ROOT/etc/apt/sources.list
+sudo cp files/apt/sources.list.$CONFIGURED_ARCH.back1 $FILESYSTEM_ROOT/etc/apt/sources.list
 sudo cp files/apt/apt-retries-count $FILESYSTEM_ROOT/etc/apt/apt.conf.d/
 sudo cp files/apt/apt.conf.d/{81norecommends,apt-{clean,gzip-indexes,no-languages},no-check-valid-until} $FILESYSTEM_ROOT/etc/apt/apt.conf.d/
 
@@ -263,7 +263,7 @@ if [[ $CONFIGURED_ARCH == armhf ]]; then
     # update ssl ca certificates for secure pem
     sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT c_rehash
 fi
-sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT curl -o /tmp/docker.asc -fsSL https://download.docker.com/linux/debian/gpg
+sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT curl -o /tmp/docker.asc -fsSL https://mirrors.aliyun.com/docker-ce/linux/debian/gpg
 sudo LANG=C chroot $FILESYSTEM_ROOT mv /tmp/docker.asc /etc/apt/trusted.gpg.d/
 sudo LANG=C chroot $FILESYSTEM_ROOT add-apt-repository \
                                     "deb [arch=$CONFIGURED_ARCH] https://download.docker.com/linux/debian $IMAGE_DISTRO stable"
@@ -777,6 +777,7 @@ if [[ $TARGET_BOOTLOADER == uboot ]]; then
         sudo LANG=C chroot $FILESYSTEM_ROOT mv /boot/u${INITRD_FILE} /boot/$INITRD_FILE
     elif [[ $CONFIGURED_ARCH == arm64 ]]; then
         sudo cp -v $PLATFORM_DIR/${sonic_asic_platform}-${CONFIGURED_ARCH}/sonic_fit.its $FILESYSTEM_ROOT/boot/
+	sudo LANG=C chroot $FILESYSTEM_ROOT mkimage -V
         sudo LANG=C chroot $FILESYSTEM_ROOT mkimage -f /boot/sonic_fit.its /boot/sonic_${CONFIGURED_ARCH}.fit
     fi
 fi

@@ -240,6 +240,14 @@ sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-mark manu
 
 # Install systemd-python for SONiC host services
 sudo https_proxy=$https_proxy LANG=C chroot $FILESYSTEM_ROOT pip3 install systemd-python
+#if [[ $CONFIGURED_ARCH == armhf ]]; then
+    # Install pygobject from apt repos, since it has armhf prebuilt. The version in Debian is
+    # a bit older than what is in pip.
+    #
+    # When doing the next Debian upgrade (to Trixie), consider installing this package for all
+    # architectures instead of just armhf.
+    sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install python3-gi
+#fi
 
 # Install SONiC host services package
 SONIC_HOST_SERVICES_PY3_WHEEL_NAME=$(basename {{sonic_host_services_py3_wheel_path}})
@@ -785,6 +793,9 @@ fi
 sudo cp $BUILD_TEMPLATES/docker_image_ctl.j2 $FILESYSTEM_ROOT_USR_SHARE_SONIC_TEMPLATES/docker_image_ctl.j2
 
 # Generate shutdown order
+sudo chroot ./fsroot-marvell-arm64 pip3 install urllib3==2.6.3
+sudo chroot ./fsroot-marvell-arm64 pip3 install requests==2.31.0
+sudo chroot ./fsroot-marvell-arm64 pip3 install docker==7.1.0
 sudo LANG=C DOCKER_HOST="$DOCKER_HOST" chroot $FILESYSTEM_ROOT /usr/local/bin/generate_shutdown_order.py
 
 {% if include_kubernetes == "y" %}
@@ -841,8 +852,9 @@ sudo LANG=C chroot $FILESYSTEM_ROOT systemctl enable kubernetes_master_entrance.
 
 {% for package in sonic_packages.strip().split() -%}
 {% set name, repo, version, set_owner, enabled = package.split('|') -%}
-sudo LANG=C DOCKER_HOST="$DOCKER_HOST" chroot $FILESYSTEM_ROOT sonic-package-manager repository add {{ name }} {{ repo }}
-sudo LANG=C DOCKER_HOST="$DOCKER_HOST" chroot $FILESYSTEM_ROOT sonic-package-manager install {{ name }}=={{ version }} {{ get_install_options(set_owner, enabled) }}
+#sudo LANG=C DOCKER_HOST="$DOCKER_HOST" chroot $FILESYSTEM_ROOT sonic-package-manager repository add {{ name }} {{ repo }}
+sudo cp ols-ucentral-client-1.0.0.tar $FILESYSTEM_ROOT/tmp
+sudo LANG=C DOCKER_HOST="$DOCKER_HOST" chroot $FILESYSTEM_ROOT sonic-package-manager install --from-tarball /tmp/ols-ucentral-client-1.0.0.tar {{ get_install_options(set_owner, enabled) }}
 {% endfor -%}
 
 {% for package in sonic_local_packages.strip().split() -%}

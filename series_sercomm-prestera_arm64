@@ -1,0 +1,7 @@
+sc_0001_modify_gnmi_goproxy.patch|src/sonic-gnmi
+sc_0002_modify_sonic-mgmt-common_goproxy.patch|src/sonic-mgmt-common
+sc_0003_modify_sonic-mgmt-framework_goproxy.patch|src/sonic-mgmt-framework
+sc_0004_modify_sonic-linux-kernel_download_url.patch|src/sonic-linux-kernel
+sc_0005_modify_sonic-host-services_pycairo_version.patch|src/sonic-host-services
+sc_0006_modify_sonic-utilities_m2crypto_version.patch|src/sonic-utilities
+sc_0007_modify_debootstrap_download_url.patch|sonic-buildimage

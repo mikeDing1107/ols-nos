@@ -1,0 +1,40 @@
+From 065bd0d3d7012b6419ca6abe8e5042f841d9840a Mon Sep 17 00:00:00 2001
+From: josh <josh_jiang@sdc.sercomm.com>
+Date: Wed, 11 Feb 2026 15:02:55 +0800
+Subject: [PATCH] modify sonic-linux-kernel download rul
+
+---
+ Makefile | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 7389016..4f1dc9d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -28,11 +28,11 @@ ifneq ($(kernel_procure_method), build)
+ # Downloading kernel
+ 
+ # TBD, need upload the new kernel packages
+-LINUX_HEADER_COMMON_URL = "https://sonicstorage.blob.core.windows.net/packages/kernel-public/linux-headers-$(KVERSION_SHORT)-common_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_all.deb?sv=2015-04-05&sr=b&sig=JmF0asLzRh6btfK4xxfVqX%2F5ylqaY4wLkMb5JwBJOb8%3D&se=2128-12-23T19%3A05%3A28Z&sp=r"
++LINUX_HEADER_COMMON_URL = "https://packages.trafficmanager.net/public/kernel-public/linux-headers-$(KVERSION_SHORT)-common_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_all.deb?sv=2015-04-05&sr=b&sig=JmF0asLzRh6btfK4xxfVqX%2F5ylqaY4wLkMb5JwBJOb8%3D&se=2128-12-23T19%3A05%3A28Z&sp=r"
+ 
+-LINUX_HEADER_AMD64_URL = "https://sonicstorage.blob.core.windows.net/packages/kernel-public/linux-headers-$(KVERSION_SHORT)-amd64_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_amd64.deb?sv=2015-04-05&sr=b&sig=%2FD9a178J4L%2FN3Fi2uX%2FWJaddpYOZqGmQL4WAC7A7rbA%3D&se=2128-12-23T19%3A06%3A13Z&sp=r"
++LINUX_HEADER_AMD64_URL = "https://packages.trafficmanager.net/public/kernel-public/linux-headers-$(KVERSION_SHORT)-amd64_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_amd64.deb?sv=2015-04-05&sr=b&sig=%2FD9a178J4L%2FN3Fi2uX%2FWJaddpYOZqGmQL4WAC7A7rbA%3D&se=2128-12-23T19%3A06%3A13Z&sp=r"
+ 
+-LINUX_IMAGE_URL = "https://sonicstorage.blob.core.windows.net/packages/kernel-public/linux-image-$(KVERSION_SHORT)-amd64_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_amd64.deb?sv=2015-04-05&sr=b&sig=oRGGO9xJ6jmF31KGy%2BwoqEYMuTfCDcfILKIJbbaRFkU%3D&se=2128-12-23T19%3A06%3A47Z&sp=r"
++LINUX_IMAGE_URL = "https://packages.trafficmanager.net/public/kernel-public/linux-image-$(KVERSION_SHORT)-amd64_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION)_amd64.deb?sv=2015-04-05&sr=b&sig=oRGGO9xJ6jmF31KGy%2BwoqEYMuTfCDcfILKIJbbaRFkU%3D&se=2128-12-23T19%3A06%3A47Z&sp=r"
+ 
+ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
+ 	# Obtaining the Debian kernel packages
+@@ -54,7 +54,7 @@ DSC_FILE = linux_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION).dsc
+ DEBIAN_FILE = linux_$(KERNEL_VERSION)-$(KERNEL_SUBVERSION).debian.tar.xz
+ ORIG_FILE = linux_$(KERNEL_VERSION).orig.tar.xz
+ BUILD_DIR=linux-$(KERNEL_VERSION)
+-SOURCE_FILE_BASE_URL="https://sonicstorage.blob.core.windows.net/debian-security/pool/updates/main/l/linux"
++SOURCE_FILE_BASE_URL="https://packages.trafficmanager.net/public/debian-security/pool/updates/main/l/linux"
+ 
+ DSC_FILE_URL = "$(SOURCE_FILE_BASE_URL)/$(DSC_FILE)"
+ DEBIAN_FILE_URL = "$(SOURCE_FILE_BASE_URL)/$(DEBIAN_FILE)"
+-- 
+2.25.1
+
