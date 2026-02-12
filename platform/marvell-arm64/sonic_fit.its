@@ -14,7 +14,7 @@
             compression = "none";
             load = <0x2 0x2080000>;
             entry = <0x2 0x2080000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -25,7 +25,7 @@
             arch = "arm64";
             compression = "none";
             load = <0x2 0x1000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -36,7 +36,7 @@
             arch = "arm64";
             compression = "none";
             load = <0x2 0x1000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -49,7 +49,7 @@
             compression = "gzip";
             load = <0x2 0x6000000>;
             entry = <0x2 0x6000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -62,7 +62,7 @@
             compression = "none";
             load = <0x2000000>;
             entry = <0x2000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -75,7 +75,7 @@
             compression = "gzip";
             load = <0x6000000>;
             entry = <0x6000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -87,7 +87,7 @@
             compression = "none";
             load = <0x1000000>;
             entry = <0x1000000>;
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -99,7 +99,7 @@
             kernel = "kernel_ac5x";
             fdt = "fdt_ac5x";
             ramdisk = "ramdisk_ac5x";
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -108,7 +108,7 @@
             kernel = "kernel_ac5x";
             fdt = "fdt_7215_a1";
             ramdisk = "ramdisk_ac5x";
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };
@@ -117,7 +117,7 @@
             kernel = "kernel_1";
             fdt = "fdt_cn9131";
             ramdisk = "ramdisk_1";
-            hash@1 {
+            hash {
                 algo = "sha1";
             };
         };

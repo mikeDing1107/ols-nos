@@ -1,0 +1,24 @@
+From 794d494b55100eca14cf14114a33ab01b9caed4d Mon Sep 17 00:00:00 2001
+From: josh <josh_jiang@sdc.sercomm.com>
+Date: Wed, 11 Feb 2026 15:04:30 +0800
+Subject: [PATCH] modify sonic-host-services pycairo version
+
+---
+ setup.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/setup.py b/setup.py
+index 51458f7..37c58ec 100644
+--- a/setup.py
++++ b/setup.py
+@@ -46,6 +46,7 @@ setup(
+         'dbus-python',
+         'systemd-python',
+         'Jinja2>=2.10',
++        'pycairo==1.23.0',
+         'PyGObject',
+     ] + sonic_dependencies,
+     setup_requires = [
+-- 
+2.25.1
+

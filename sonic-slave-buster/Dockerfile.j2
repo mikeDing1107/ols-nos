@@ -105,6 +105,8 @@ RUN apt-get update && apt-get install -y eatmydata && eatmydata apt-get install 
         python-pip \
         python3 \
         python3-pip \
+        python3-setuptools \
+        python3-wheel \
         libncurses5-dev \
         texinfo \
         dh-autoreconf \
@@ -470,42 +472,40 @@ RUN eatmydata apt-get install -y kernel-wedge
 {%- endif %}
 
 # For gobgp and telemetry build
+COPY ["go1.15.15.linux-arm64.tar.gz", "./"]
 RUN export VERSION=1.15.15 \
 {%- if CONFIGURED_ARCH == "armhf" and CROSS_BUILD_ENVIRON != "y" %}
  && wget https://storage.googleapis.com/golang/go$VERSION.linux-armv6l.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-armv6l.tar.gz \
 {%- elif CONFIGURED_ARCH == "arm64" and CROSS_BUILD_ENVIRON != "y" %}
- && wget https://storage.googleapis.com/golang/go$VERSION.linux-arm64.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-arm64.tar.gz \
 {%- else %}
  && wget https://storage.googleapis.com/golang/go$VERSION.linux-amd64.tar.gz \
  && tar -C /usr/local -xzf go$VERSION.linux-amd64.tar.gz \
 {%- endif %}
  && echo 'export GOROOT=/usr/local/go' >> /etc/bash.bashrc \
- && echo 'export PATH=$PATH:$GOROOT/bin' >> /etc/bash.bashrc \
- && rm go$VERSION.linux-*.tar.gz
+ && echo 'export PATH=$PATH:$GOROOT/bin' >> /etc/bash.bashrc 
 
-RUN pip3 install --upgrade pip
-RUN pip2 install --upgrade 'pip<21'
+RUN pip3 install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple
+RUN pip2 install --upgrade 'pip<21' -i https://mirrors.aliyun.com/pypi/simple
 RUN apt-get purge -y python-pip python3-pip python3-yaml
 
 # For building Python packages
-RUN pip2 install setuptools==40.8.0
-RUN pip2 install wheel==0.35.1
-RUN pip3 install setuptools==49.6.00
-RUN pip3 install wheel==0.38.1
+RUN pip2 install setuptools==40.8.0 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip2 install wheel==0.35.1 -i https://mirrors.aliyun.com/pypi/simple
+
 
 # For building sonic-utilities
-RUN pip2 install fastentrypoints
-RUN pip3 install fastentrypoints
+RUN pip2 install fastentrypoints -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install fastentrypoints -i https://mirrors.aliyun.com/pypi/simple
 
 # For running Python unit tests
-RUN pip2 install pytest-runner==4.4
-RUN pip3 install pytest-runner==5.2
-RUN pip2 install nose==1.3.7
-RUN pip3 install nose==1.3.7
-RUN pip2 install mockredispy==2.9.3
-RUN pip3 install mockredispy==2.9.3
+RUN pip2 install pytest-runner==4.4 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install pytest-runner==5.2 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip2 install nose==1.3.7 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install nose==1.3.7 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip2 install mockredispy==2.9.3 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install mockredispy==2.9.3 -i https://mirrors.aliyun.com/pypi/simple
 
 # Fix CVE-2021-23437, need to build and install libjpeg-dev for armhf for pillow 9.4.0
 {%- if CONFIGURED_ARCH == "armhf" %}
@@ -518,61 +518,61 @@ RUN TMP_DIR=$(mktemp -d) && \
     eatmydata dpkg -i $TMP_DIR/libjpeg*-dev*.deb && \
     rm -rf $TMP_DIR
 {%- endif %}
-RUN pip3 install pillow==9.4.0
+RUN pip3 install pillow==9.4.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For Python 2 unit tests, we need 'mock'. The last version of 'mock'
 # which supports Python 2 is 3.0.5. In Python 3, 'mock' is part of 'unittest'
 # in the standard library
-RUN pip2 install mock==3.0.5
+RUN pip2 install mock==3.0.5 -i https://mirrors.aliyun.com/pypi/simple
 
 # For p4 build
 RUN pip2 install \
          ctypesgen==1.0.2 \
-         crc16
+         crc16 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic config engine testing
 # Install pyangbind here, outside sonic-config-engine dependencies, as pyangbind causes enum34 to be installed.
 # enum34 causes Python 're' package to not work properly as it redefines an incompatible enum.py module
 # https://github.com/robshakir/pyangbind/issues/232
-RUN pip3 install pyangbind==0.8.1
+RUN pip3 install pyangbind==0.8.1 -i https://mirrors.aliyun.com/pypi/simple
 RUN pip3 uninstall -y enum34
 
 # For templating
-RUN pip2 install j2cli==0.3.10
+RUN pip2 install j2cli==0.3.10 -i https://mirrors.aliyun.com/pypi/simple
 # Note: Jinja2 depends on MarkupSafe, however markupsafe 2.1.0 breaks Jinja2 2.10
 # Debian buster dist-packages include python3-markupsafe (1.1.0-1) and python3-jinja2 (2.10-2)
 # If not pinning the versions, any requirement like `MarkupSafe>=2.0` will pull latest into site-packages and mess up.
-RUN pip3 install MarkupSafe==2.0.1
-RUN pip3 install Jinja2==3.0.3
+RUN pip3 install MarkupSafe==2.0.1 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install Jinja2==3.0.3 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic-mgmt-framework
 # The option --no-build-isolation can be removed when upgrading PyYAML to 6.0.1
-RUN pip2 install "PyYAML==5.4.1" --no-build-isolation
-RUN pip3 install "PyYAML==5.4.1" --no-build-isolation
+RUN pip2 install "PyYAML==5.4.1" --no-build-isolation -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install "PyYAML==5.4.1" --no-build-isolation -i https://mirrors.aliyun.com/pypi/simple
 
 {%- if CROSS_BUILD_ENVIRON != "y" %}
-RUN pip2 install "lxml==4.9.1"
-RUN pip3 install "lxml==4.9.1"
+RUN pip2 install "lxml==4.9.1" -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install "lxml==4.9.1" -i https://mirrors.aliyun.com/pypi/simple
 {%- endif %}
 
 # For sonic-platform-common testing
-RUN pip2 install redis
-RUN pip3 install redis
+RUN pip2 install redis -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install redis -i https://mirrors.aliyun.com/pypi/simple
 
 # For vs image build
-RUN pip2 install pexpect==4.6.0
-RUN pip3 install pexpect==4.8.0
+RUN pip2 install pexpect==4.6.0 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install pexpect==4.8.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic-swss-common testing
-RUN pip2 install Pympler==0.8
-RUN pip3 install Pympler==0.8
+RUN pip2 install Pympler==0.8 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install Pympler==0.8 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic_yang_model build
-RUN pip3 install pyang==2.4.0
+RUN pip3 install pyang==2.4.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For mgmt-framework build
-RUN pip2 install mmh3==2.5.1
-RUN pip3 install mmh3==2.5.1
+RUN pip2 install mmh3==2.5.1 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install mmh3==2.5.1 -i https://mirrors.aliyun.com/pypi/simple
 
 RUN eatmydata apt-get install -y xsltproc
 
@@ -595,12 +595,12 @@ RUN mkdir /var/run/sshd
 EXPOSE 22
 
 # Install depot-tools (for git-retry)
-RUN git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /usr/share/depot_tools
+COPY ["depot_tools", "/usr/share/depot_tools"]
 ENV PATH /usr/share/depot_tools:$PATH
 
 # Install dependencies for dhcp relay test
-RUN pip3 install parameterized==0.8.1
-RUN pip3 install pyfakefs
+RUN pip3 install parameterized==0.8.1 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install pyfakefs -i https://mirrors.aliyun.com/pypi/simple
 
 # Install docker engine 24 inside docker and enable experimental feature
 RUN apt-get update
@@ -613,12 +613,12 @@ RUN eatmydata apt-get install -y \
 {%- if CONFIGURED_ARCH == "armhf" %}
     RUN update-ca-certificates --fresh
 {%- endif %}
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/debian/gpg | sudo apt-key add -
 RUN add-apt-repository \
 {%- if CROSS_BUILD_ENVIRON == "y" %}
-           "deb  https://download.docker.com/linux/debian \
+           "deb  https://mirrors.aliyun.com/docker-ce/linux/debian \
 {%- else %}
-           "deb [arch={{ CONFIGURED_ARCH }}] https://download.docker.com/linux/debian \
+           "deb [arch={{ CONFIGURED_ARCH }}] https://mirrors.aliyun.com/docker-ce/linux/debian \
 {%- endif %}
            $(lsb_release -cs) \
            stable"
@@ -628,14 +628,14 @@ RUN echo "DOCKER_OPTS=\"--experimental --storage-driver=vfs {{ DOCKER_EXTRA_OPTS
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 # Install m2crypto package, needed by SWI tools
-RUN pip2 install m2crypto==0.36.0
+RUN apt-get install python3-m2crypto
 
 # Install swi tools
 RUN pip3 install git+https://github.com/aristanetworks/swi-tools.git@bead66bf261770237f7dd21ace3774ba04a017e9
 
 {% if CONFIGURED_ARCH != "amd64" -%}
 # Install node.js for azure pipeline
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN eatmydata apt-get install -y nodejs
 
 {%- if CROSS_BUILD_ENVIRON == "y" %}
@@ -647,7 +647,7 @@ RUN eatmydata apt-get install -y -t buster-backports \
         libbpf-dev:$arch
 
 RUN apt-get download libgirepository1.0-dev:$arch && eatmydata dpkg --force-all -i libgirepository1.0-dev*
-RUN PATH=/python_virtualenv/env3/bin/:$PATH pip3 install pycairo
+RUN PATH=/python_virtualenv/env3/bin/:$PATH pip3 install pycairo -i https://mirrors.aliyun.com/pypi/simple
 
 # Install libpcsclite-dev for wpasupplicant using download because regular install removes amd64 python package
 RUN apt-get download libpcsclite1:$arch && eatmydata dpkg --force-all -i libpcsclite1* && apt-get download libpcsclite-dev:$arch && eatmydata dpkg --force-all -i libpcsclite-dev*

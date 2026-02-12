@@ -25,7 +25,7 @@ COPY ["no-check-valid-until", "/etc/apt/apt.conf.d/"]
 COPY ["apt-retries-count", "/etc/apt/apt.conf.d"]
 
 {%- if CROSS_BUILD_ENVIRON != "y" %}
-COPY ["sources.list.{{ CONFIGURED_ARCH }}", "/etc/apt/sources.list"]
+COPY ["sources.list.{{ CONFIGURED_ARCH }}.back1", "/etc/apt/sources.list"]
 {%- else %}
 COPY ["sources.list.amd64", "/etc/apt/sources.list"]
 {%- if CONFIGURED_ARCH == "armhf" %}
@@ -82,7 +82,7 @@ RUN PATH=/python_virtualenv/env3/bin/:$PATH pip3 install --force-reinstall --no-
 
 {%- if CONFIGURED_ARCH == "arm64" and MULTIARCH_QEMU_ENVIRON == "y" %}
 # multiarch/debian-debootstrap:arm64-bullseye is too old. It needs to install keys
-RUN apt-get update || apt-get install -y gnupg
+RUN apt-get update && apt-get install -y gnupg
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6ED0E7B82643E131
 {%- endif %}
@@ -481,19 +481,19 @@ RUN eatmydata apt-get install -y kernel-wedge
 # For gobgp and telemetry build
 RUN eatmydata apt-get install -y golang-1.15 && ln -s /usr/lib/go-1.15 /usr/local/go
 {%- if INCLUDE_FIPS == "y" %}
-RUN wget -O golang-go.deb 'https://sonicstorage.blob.core.windows.net/public/fips/bullseye/0.1/{{ CONFIGURED_ARCH }}/golang-1.15-go_1.15.15-1~deb11u4%2Bfips_{{ CONFIGURED_ARCH }}.deb' \
- && wget -O golang-src.deb 'https://sonicstorage.blob.core.windows.net/public/fips/bullseye/0.1/{{ CONFIGURED_ARCH }}/golang-1.15-src_1.15.15-1~deb11u4%2Bfips_{{ CONFIGURED_ARCH }}.deb' \
+RUN wget -O golang-go.deb 'https://packages.trafficmanager.net/public/fips/bullseye/0.1/{{ CONFIGURED_ARCH }}/golang-1.15-go_1.15.15-1~deb11u4%2Bfips_{{ CONFIGURED_ARCH }}.deb' \
+ && wget -O golang-src.deb 'https://packages.trafficmanager.net/public/fips/bullseye/0.1/{{ CONFIGURED_ARCH }}/golang-1.15-src_1.15.15-1~deb11u4%2Bfips_{{ CONFIGURED_ARCH }}.deb' \
  && eatmydata dpkg -i golang-go.deb golang-src.deb \
  && ln -sf /usr/lib/go-1.15 /usr/local/go \
  && rm golang-go.deb golang-src.deb
 {%- endif %}
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade pip -i https://mirrors.aliyun.com/pypi/simple
 RUN apt-get purge -y python3-pip python3-yaml
 
 # For building Python packages
-RUN pip3 install setuptools==49.6.00
-RUN pip3 install wheel==0.38.1
+RUN pip3 install setuptools==49.6.00 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install wheel==0.38.1 -i https://mirrors.aliyun.com/pypi/simple
 
 {%- if CONFIGURED_ARCH == "armhf" %}
 # Allow only manylinux wheels on armhf, to ensure that binaries/libraries work correctly on armhf
@@ -506,17 +506,17 @@ RUN patch -p1 -i /disable-non-manylinux.patch /usr/local/lib/python3.9/dist-pack
 {%- endif %}
 
 # For building sonic-utilities
-RUN pip3 install fastentrypoints mock
+RUN pip3 install fastentrypoints mock -i https://mirrors.aliyun.com/pypi/simple
 
 # For building sonic_ycabled
 # Note: upstream build breaks with old version of setuptools
 # ref: https://github.com/grpc/grpc/issues/34569
-RUN pip3 install grpcio==1.58.0 grpcio-tools==1.58.0
+RUN pip3 install grpcio==1.58.0 grpcio-tools==1.58.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For running Python unit tests
-RUN pip3 install pytest-runner==5.2
-RUN pip3 install nose==1.3.7
-RUN pip3 install mockredispy==2.9.3
+RUN pip3 install pytest-runner==5.2 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install nose==1.3.7 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install mockredispy==2.9.3 -i https://mirrors.aliyun.com/pypi/simple
 
 # Fix CVE-2021-23437, need to build and install libjpeg-dev for armhf for pillow 9.4.0
 {%- if CONFIGURED_ARCH == "armhf" %}
@@ -529,46 +529,46 @@ RUN TMP_DIR=$(mktemp -d) && \
     eatmydata dpkg -i $TMP_DIR/libjpeg*-dev*.deb && \
     rm -rf $TMP_DIR
 {%- endif %}
-RUN pip3 install pillow==9.4.0
+RUN pip3 install pillow==9.4.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For p4 build
 RUN pip3 install \
          ctypesgen==1.0.2 \
-         crc16
+         crc16 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic config engine testing
 # Install pyangbind here, outside sonic-config-engine dependencies, as pyangbind causes enum34 to be installed.
 # enum34 causes Python 're' package to not work properly as it redefines an incompatible enum.py module
 # https://github.com/robshakir/pyangbind/issues/232
-RUN pip3 install pyangbind==0.8.1
+RUN pip3 install pyangbind==0.8.1 -i https://mirrors.aliyun.com/pypi/simple
 RUN pip3 uninstall -y enum34
 
 # For templating
-RUN pip3 install j2cli==0.3.10
+RUN pip3 install j2cli==0.3.10 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic-mgmt-framework
 # The option --no-build-isolation can be removed when upgrading PyYAML to 6.0.1
-RUN pip3 install "PyYAML==5.4.1" --no-build-isolation
+RUN pip3 install "PyYAML==5.4.1" --no-build-isolation -i https://mirrors.aliyun.com/pypi/simple
 {%- if CROSS_BUILD_ENVIRON != "y" %}
-RUN pip3 install "lxml==4.9.1"
+RUN pip3 install "lxml==4.9.1" -i https://mirrors.aliyun.com/pypi/simple
 {%- endif %}
 
 # For sonic-platform-common testing
-RUN pip3 install redis
+RUN pip3 install redis -i https://mirrors.aliyun.com/pypi/simple
 
 # For vs image build
-RUN pip3 install pexpect==4.8.0
+RUN pip3 install pexpect==4.8.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic-swss-common testing
-RUN pip3 install Pympler==0.8
+RUN pip3 install Pympler==0.8 -i https://mirrors.aliyun.com/pypi/simple
 
 # For sonic_yang_model build
-RUN pip3 install pyang==2.4.0
+RUN pip3 install pyang==2.4.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # For mgmt-framework build
-RUN pip3 install mmh3==2.5.1
+RUN pip3 install mmh3==2.5.1 -i https://mirrors.aliyun.com/pypi/simple
 
-RUN pip3 install parameterized==0.8.1
+RUN pip3 install parameterized==0.8.1 -i https://mirrors.aliyun.com/pypi/simple
 
 RUN eatmydata apt-get install -y xsltproc
 
@@ -591,8 +591,8 @@ RUN mkdir /var/run/sshd
 EXPOSE 22
 
 # Install dependencies for dhcp relay test
-RUN pip3 install parameterized==0.8.1
-RUN pip3 install pyfakefs
+RUN pip3 install parameterized==0.8.1 -i https://mirrors.aliyun.com/pypi/simple
+RUN pip3 install pyfakefs -i https://mirrors.aliyun.com/pypi/simple
 
 # Install docker engine 24 inside docker and enable experimental feature
 RUN apt-get update
@@ -605,12 +605,12 @@ RUN eatmydata apt-get install -y \
 {%- if CONFIGURED_ARCH == "armhf" %}
     RUN update-ca-certificates --fresh
 {%- endif %}
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+RUN curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/debian/gpg | sudo apt-key add -
 RUN add-apt-repository \
 {%- if CROSS_BUILD_ENVIRON == "y" %}
-           "deb  https://download.docker.com/linux/debian \
+           "deb  https://mirrors.aliyun.com/docker-ce/linux/debian \
 {%- else %}
-           "deb [arch={{ CONFIGURED_ARCH }}] https://download.docker.com/linux/debian \
+           "deb [arch={{ CONFIGURED_ARCH }}] https://mirrors.aliyun.com/docker-ce/linux/debian \
 {%- endif %}
            $(lsb_release -cs) \
            stable"
@@ -620,14 +620,14 @@ RUN echo "DOCKER_OPTS=\"--experimental --storage-driver=vfs {{ DOCKER_EXTRA_OPTS
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 # Install m2crypto package, needed by SWI tools
-RUN pip3 install m2crypto==0.36.0
+RUN pip3 install m2crypto==0.36.0 -i https://mirrors.aliyun.com/pypi/simple
 
 # Install swi tools
 RUN pip3 install git+https://github.com/aristanetworks/swi-tools.git@bead66bf261770237f7dd21ace3774ba04a017e9
 
 {% if CONFIGURED_ARCH != "amd64" -%}
 # Install node.js for azure pipeline
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN eatmydata apt-get install -y nodejs
 
 {%- if CROSS_BUILD_ENVIRON == "y" %}
@@ -636,7 +636,7 @@ RUN eatmydata apt-get install -y rsync dh-python
 RUN eatmydata apt-get install -y libelf-dev:$arch libdw-dev:$arch  libbz2-dev:$arch liblzo2-dev:$arch libedit-dev:$arch libevent-dev:$arch libopts25-dev:$arch libssl-dev:$arch pps-tools:$arch libpam-cap:$arch libcap-dev:$arch libpam0g-dev:$arch libaudit-dev:$arch libgtk-3-dev:$arch libkrb5-dev:$arch libsystemd-dev:$arch libwrap0-dev:$arch libkrb5-dev:$arch libboost1.74-dev:$arch libboost-dev:$arch libzmq5:$arch libzmq3-dev:$arch libdaemon-dev:$arch libjansson-dev:$arch libmnl-dev:$arch libsensors5:$arch libsensors4-dev:$arch libperl-dev:$arch libmariadb-dev:$arch libmariadb-dev-compat:$arch libpci-dev:$arch libjson-c-dev:$arch libreadline-dev:$arch librtr-dev:$arch librrd-dev:$arch libnetfilter-conntrack-dev:$arch libnetfilter-conntrack3:$arch libnfnetlink-dev:$arch libnftnl-dev:$arch libldap2-dev:$arch libbind-export-dev:$arch check:$arch libboost-atomic-dev:$arch libboost-test-dev:$arch libglib2.0-dev:$arch libexplain-dev:$arch libc-ares-dev:$arch libiptc0:$arch libxtables12:$arch libatm1-dev:$arch libbpf-dev:$arch libdb-dev:$arch pkg-config:$arch libnghttp2-14:$arch librtmp1:$arch libssh2-1:$arch libcjson1:$arch libcjson-dev:$arch libcurl4-openssl-dev:$arch libboost-thread1.74-dev:$arch libboost-thread-dev:$arch libboost-system1.74-dev:$arch libboost-system-dev:$arch libgtest-dev:$arch libgmock-dev:$arch libfido2-dev:$arch libcunit1:$arch libcunit1-dev:$arch libauparse-dev:$arch libnetsnmptrapd40:$arch qtbase5-dev:$arch libboost-log-dev:$arch libboost-filesystem-dev:$arch libboost-program-options-dev:$arch
 
 RUN apt-get download libgirepository1.0-dev:$arch && eatmydata dpkg --force-all -i libgirepository1.0-dev*
-RUN PATH=/python_virtualenv/env3/bin/:$PATH pip3 install pycairo
+RUN PATH=/python_virtualenv/env3/bin/:$PATH pip3 install pycairo -i https://mirrors.aliyun.com/pypi/simple
 
 # Install libpcsclite-dev for wpasupplicant using download because regular install removes amd64 python package
 RUN apt-get download libpcsclite1:$arch && eatmydata dpkg --force-all -i libpcsclite1* && apt-get download libpcsclite-dev:$arch && eatmydata dpkg --force-all -i libpcsclite-dev*

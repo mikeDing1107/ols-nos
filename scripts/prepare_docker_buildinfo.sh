@@ -36,6 +36,9 @@ if [ -z "$DISTRO" ]; then
         DISTRO=$(docker run --rm --entrypoint "" $DOCKER_BASE_IMAGE cat /etc/apt/sources.list | grep deb.debian.org | awk '{print $3}')
         [ -z "$DISTRO" ] && DISTRO=jessie
     fi
+    if [[ "$DISTRO" != "buster" ]]; then
+	    DISTRO=bullseye
+    fi
 fi
 
 if [[ "$IMAGENAME" == sonic-slave-* ]] || [[ "$IMAGENAME" == docker-base-* ]] || [[ "$IMAGENAME" == docker-ptf ]]; then

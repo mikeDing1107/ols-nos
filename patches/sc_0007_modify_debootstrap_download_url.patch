@@ -1,0 +1,25 @@
+From b398c14062fefb4f713d8c9467ddc48b52aed5a9 Mon Sep 17 00:00:00 2001
+From: josh <josh_jiang@sdc.sercomm.com>
+Date: Thu, 12 Feb 2026 12:10:24 +0800
+Subject: [PATCH] modify debootstrap download url
+
+---
+ src/debootstrap/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/debootstrap/Makefile b/src/debootstrap/Makefile
+index 04e8646a1..894f08949 100644
+--- a/src/debootstrap/Makefile
++++ b/src/debootstrap/Makefile
+@@ -9,7 +9,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
+ 	rm -rf ./debootstrap-$(DEBOOTSTRAP_VERSION) ./debootstrap*.{deb,udeb,dsc}
+ 
+ 	# Get source package
+-	dget https://deb.debian.org/debian/pool/main/d/debootstrap/debootstrap_$(DEBOOTSTRAP_VERSION).dsc
++	dget https://snapshot.debian.org/archive/debian/20220728T221646Z/pool/main/d/debootstrap/debootstrap_1.0.123+deb11u1.dsc
+ 
+ 	# Build source and Debian packages
+ 	pushd debootstrap-$(DEBOOTSTRAP_VERSION)
+-- 
+2.25.1
+
