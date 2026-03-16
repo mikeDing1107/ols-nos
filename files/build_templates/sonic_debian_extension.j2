@@ -73,6 +73,9 @@ if [[ $MULTIARCH_QEMU_ENVIRON == y  || $CROSS_BUILD_ENVIRON == y ]]; then
     SONIC_NATIVE_DOCKERD_FOR_DOCKERFS_PID="cat `pwd`/dockerfs/var/run/docker.pid"
 else
     sudo chroot $FILESYSTEM_ROOT $DOCKER_CTL_SCRIPT start
+    sudo chroot $FILESYSTEM_ROOT sleep 10
+    sudo chroot $FILESYSTEM_ROOT $DOCKER_CTL_SCRIPT stop
+    sudo chroot $FILESYSTEM_ROOT $DOCKER_CTL_SCRIPT start
 fi
 
 # Update apt's snapshot of its repos
